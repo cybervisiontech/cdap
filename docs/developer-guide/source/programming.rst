@@ -1,11 +1,30 @@
-.. :author: Cask, Inc.
+.. :author: Cask Data, Inc.
    :description: Introduction to Programming Applications for the Cask Data Application Platform
 
 ======================
 CDAP Programming Guide
 ======================
 
-**Introduction to Programming Applications for the Cask Data Application Platform**
+--------------------------------------------------------------------------------------
+Introduction to Programming Applications for the Cask Data Application Platform (CDAP)
+--------------------------------------------------------------------------------------
+
+.. class:: center
+
+   **© Copyright 2014 Cask Data, Inc. All Rights Reserved.**
+
+   .. raw:: pdf
+   
+      Spacer 0,200
+
+   .. image:: _static/cask_logo_horizontal.pdf
+      :width: 4in
+
+.. rst2pdf: .. contents::
+.. rst2pdf: config _templates/pdf-config
+.. rst2pdf: stylesheets _templates/pdf-stylesheet
+.. rst2pdf: build ../build-pdf/
+
 
 Introduction
 ============
@@ -576,6 +595,8 @@ CDAP ``Mapper`` and ``Reducer`` implement `the standard Hadoop APIs
       context.write(key.copyBytes(), Bytes.toBytes(sum));
     }
   }
+
+.. rst2pdf: PageBreak
 
 MapReduce and Datasets
 ----------------------

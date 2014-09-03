@@ -1,11 +1,20 @@
-.. :author: Cask, Inc.
-   :description: HTTP RESTful Interface to the Cask DAP
-
-.. highlight:: console
+.. :author: Cask Data, Inc.
+   :description: HTTP RESTful Interface to the Cask Data Application Platform
 
 =====================
 CDAP HTTP RESTful API
 =====================
+
+.. class:: center
+
+   **© Copyright 2014 Cask Data, Inc. All Rights Reserved.**
+
+   .. raw:: pdf
+   
+      Spacer 0,200
+
+   .. image:: _static/cask_logo_horizontal.pdf
+      :width: 4in
 
 .. rst2pdf: .. contents::
 .. rst2pdf: config _templates/pdf-config
