@@ -485,6 +485,13 @@ public final class Constants {
       public static final String SSL_KEYSTORE_PASSWORD = "security.auth.server.ssl.keystore.password";
     }
 
+    /**
+     * Security-related headers.
+     */
+    public static final class Headers {
+      public static final String USER_ID = "UserId";
+    }
+
     /** Path to the Kerberos keytab file used by CDAP */
     public static final String CFG_CDAP_MASTER_KRB_KEYTAB_PATH = "cdap.master.kerberos.keytab";
     /** Kerberos principal used by CDAP */
