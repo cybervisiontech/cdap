@@ -44,12 +44,12 @@ public class InMemoryACLClient extends ACLClient {
   }
 
   @Override
-  public List<ACL> listAcls(EntityId entityId) {
+  public List<ACL> listACLs(EntityId entityId) {
     return ImmutableList.copyOf(acls.get(entityId));
   }
 
   @Override
-  public List<ACL> listAcls(EntityId entityId, String userId) {
+  public List<ACL> listACLs(EntityId entityId, String userId) {
     final String targetUserId = userId;
     return ImmutableList.copyOf(Iterables.filter(acls.get(entityId), new Predicate<ACL>() {
       @Override
@@ -60,12 +60,12 @@ public class InMemoryACLClient extends ACLClient {
   }
 
   @Override
-  public void setAclForUser(EntityId entityId, String userId, List<PermissionType> permissions) {
+  public void setACLForUser(EntityId entityId, String userId, List<PermissionType> permissions) {
     setACLForPrincipal(acls.get(entityId), new Principal(PrincipalType.USER, userId), permissions);
   }
 
   @Override
-  public void setAclForGroup(EntityId entityId, String groupId, List<PermissionType> permissions) {
+  public void setACLForGroup(EntityId entityId, String groupId, List<PermissionType> permissions) {
     setACLForPrincipal(acls.get(entityId), new Principal(PrincipalType.GROUP, groupId), permissions);
   }
 

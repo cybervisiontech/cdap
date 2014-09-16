@@ -61,7 +61,7 @@ public class AuthorizationClient {
   private boolean isUserAuthorized(String userId, EntityId entityId,
                                    Iterable<PermissionType> requiredPermissions) throws IOException {
 
-    List<ACL> entityAcls = aclClient.listAcls(entityId);
+    List<ACL> entityAcls = aclClient.listACLs(entityId);
     if (entityAcls == null || entityAcls.isEmpty()) {
       return false;
     }

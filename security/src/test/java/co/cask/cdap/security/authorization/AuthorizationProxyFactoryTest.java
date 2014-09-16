@@ -47,7 +47,7 @@ public abstract class AuthorizationProxyFactoryTest {
 
     final Principal bobUser = new Principal(PrincipalType.USER, "bob");
     final EntityId secretEntity = new EntityId(EntityType.STREAM, "secretEntity");
-    aclClient.setAclForUser(secretEntity, bobUser.getId(), ImmutableList.of(PermissionType.READ, PermissionType.ADMIN));
+    aclClient.setACLForUser(secretEntity, bobUser.getId(), ImmutableList.of(PermissionType.READ, PermissionType.ADMIN));
 
     RequestContext.setEntityId(secretEntity);
     RequestContext.setUserId(bobUser.getId());
@@ -64,7 +64,7 @@ public abstract class AuthorizationProxyFactoryTest {
 
     final Principal bobUser = new Principal(PrincipalType.USER, "bob");
     final EntityId secretEntity = new EntityId(EntityType.STREAM, "secretEntity");
-    aclClient.setAclForUser(secretEntity, bobUser.getId(), ImmutableList.of(PermissionType.READ, PermissionType.ADMIN));
+    aclClient.setACLForUser(secretEntity, bobUser.getId(), ImmutableList.of(PermissionType.READ, PermissionType.ADMIN));
 
     TestRequiresPermissions testRequiresPermissions = proxyFactory.wrap(new TestRequiresPermissions());
     try {
@@ -83,7 +83,7 @@ public abstract class AuthorizationProxyFactoryTest {
 
     final Principal bobUser = new Principal(PrincipalType.USER, "bob");
     final EntityId secretEntity = new EntityId(EntityType.STREAM, "secretEntity");
-    aclClient.setAclForUser(secretEntity, bobUser.getId(), ImmutableList.of(PermissionType.READ, PermissionType.WRITE));
+    aclClient.setACLForUser(secretEntity, bobUser.getId(), ImmutableList.of(PermissionType.READ, PermissionType.WRITE));
 
     RequestContext.setEntityId(secretEntity);
     RequestContext.setUserId(bobUser.getId());

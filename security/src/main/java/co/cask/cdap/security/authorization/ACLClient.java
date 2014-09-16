@@ -75,27 +75,27 @@ public class ACLClient {
     };
   }
 
-  public List<ACL> listAcls(EntityId entityId) throws IOException {
+  public List<ACL> listACLs(EntityId entityId) throws IOException {
     URL url = resolveURL(String.format("/v2/admin/acls/%s/%s", entityId.getType().getPluralForm(), entityId.getId()));
     HttpResponse response = HttpRequests.execute(HttpRequest.builder(HttpMethod.GET, url).build());
     return ObjectResponse.fromJsonBody(response, new TypeToken<List<ACL>>() { }).getResponseObject();
   }
 
-  public List<ACL> listAcls(EntityId entityId, String userId) throws IOException {
+  public List<ACL> listACLs(EntityId entityId, String userId) throws IOException {
     URL url = resolveURL(String.format("/v2/admin/acls/%s/%s/user/%s", entityId.getType().getPluralForm(),
                                        entityId.getId(), userId));
     HttpResponse response = HttpRequests.execute(HttpRequest.builder(HttpMethod.GET, url).build());
     return ObjectResponse.fromJsonBody(response, new TypeToken<List<ACL>>() { }).getResponseObject();
   }
 
-  public void setAclForUser(EntityId entityId, String userId, List<PermissionType> permissions) throws IOException {
+  public void setACLForUser(EntityId entityId, String userId, List<PermissionType> permissions) throws IOException {
     URL url = resolveURL(String.format("/v2/admin/acls/%s/%s/user/%s", entityId.getType().getPluralForm(),
                                        entityId.getId(), userId));
     HttpRequest request = HttpRequest.builder(HttpMethod.PUT, url).withBody(GSON.toJson(permissions)).build();
     HttpRequests.execute(request);
   }
 
-  public void setAclForGroup(EntityId entityId, String groupId, List<PermissionType> permissions) throws IOException {
+  public void setACLForGroup(EntityId entityId, String groupId, List<PermissionType> permissions) throws IOException {
     URL url = resolveURL(String.format("/v2/admin/acls/%s/%s/group/%s", entityId.getType().getPluralForm(),
                                        entityId.getId(), groupId));
     HttpRequest request = HttpRequest.builder(HttpMethod.PUT, url).withBody(GSON.toJson(permissions)).build();
