@@ -81,5 +81,4 @@ public class InMemoryACLClient extends ACLClient {
     ACL acl = new ACL(principal, permissions);
     acls.add(acl);
   }
-
 }
