@@ -37,6 +37,14 @@ public abstract class AuthorizationProxyFactory {
 
   protected abstract <T> T doWrap(T object);
 
+  /**
+   * Wraps the provided object in a proxy that authorizes {@link RequiresPermissions} annotated method calls,
+   * only if security is enabled.
+   *
+   * @param object object to wrap in a proxy
+   * @param <T> type of the object
+   * @return the proxy object that authorizes {@link RequiresPermissions} annotated method calls
+   */
   public <T> T wrap(T object) {
     if (cConf.getBoolean(Constants.Security.CFG_SECURITY_ENABLED, false)) {
       return doWrap(object);
