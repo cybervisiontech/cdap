@@ -44,6 +44,11 @@
 
     <!-- Added to override the embedded guava class in hive-exec -->
     <dependency>
+      <groupId>co.cask.cdap</groupId>
+      <artifactId>cdap-explore-jdbc</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
       <groupId>com.google.guava</groupId>
       <artifactId>guava</artifactId>
     </dependency>
@@ -100,11 +105,6 @@
     <dependency>
       <groupId>co.cask.cdap</groupId>
       <artifactId>cdap-explore</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>co.cask.cdap</groupId>
-      <artifactId>cdap-explore-jdbc</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
