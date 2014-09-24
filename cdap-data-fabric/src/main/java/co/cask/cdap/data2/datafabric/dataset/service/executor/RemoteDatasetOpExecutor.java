@@ -76,9 +76,9 @@ public abstract class RemoteDatasetOpExecutor extends AbstractIdleService implem
     throws Exception {
 
 
-    Map<String, String> headers = ImmutableMap.of("instance-props", GSON.toJson(props),
-                                                  "type-meta", GSON.toJson(typeMeta));
-    HttpRequest request = HttpRequest.post(resolve(instanceName, "create")).addHeaders(headers).build();
+    Map<String, String> body = ImmutableMap.of("instanceProps", GSON.toJson(props),
+                                               "typeMeta", GSON.toJson(typeMeta));
+    HttpRequest request = HttpRequest.post(resolve(instanceName, "create")).withBody(GSON.toJson(body)).build();
     HttpResponse response = HttpRequests.execute(request);
     verifyResponse(response);
 

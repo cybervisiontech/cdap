@@ -28,7 +28,9 @@ import co.cask.cdap.gateway.auth.Authenticator;
 import co.cask.cdap.gateway.handlers.AuthenticatedHttpHandler;
 import co.cask.cdap.proto.DatasetTypeMeta;
 import co.cask.http.HttpResponder;
+import com.google.common.base.Charsets;
 import com.google.common.base.Preconditions;
+import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import com.google.inject.Inject;
 import org.apache.commons.lang.StringUtils;
@@ -38,6 +40,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.util.Map;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -80,10 +83,12 @@ public class DatasetAdminOpHTTPHandler extends AuthenticatedHttpHandler {
   public void create(HttpRequest request, HttpResponder responder, @PathParam("name") String name)
   throws Exception {
 
-    String propsHeader = request.getHeader("instance-props");
-    Preconditions.checkArgument(propsHeader != null, "Missing required 'instance-props' header.");
-    String typeMetaHeader = request.getHeader("type-meta");
-    Preconditions.checkArgument(propsHeader != null, "Missing required 'type-meta' header.");
+    Map<String, String> body = GSON.fromJson(request.getContent().toString(Charsets.UTF_8),
+                                             new TypeToken<Map<String, String>>() { }.getType());
+    String propsHeader = body.get("instanceProps");
+    Preconditions.checkArgument(propsHeader != null, "Missing required 'instanceProps' value.");
+    String typeMetaHeader = body.get("typeMeta");
+    Preconditions.checkArgument(propsHeader != null, "Missing required 'typeMeta' value.");
 
     LOG.info("Creating dataset instance {}, type meta: {}, props: {}", name, typeMetaHeader, propsHeader);
 
