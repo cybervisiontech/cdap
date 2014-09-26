@@ -119,7 +119,7 @@
     <mockito.version>1.9.5</mockito.version>
     <mysql.version>5.1.21</mysql.version>
     <netty.version>3.6.6.Final</netty.version>
-    <netty.http.version>0.4.1</netty.http.version>
+    <netty.http.version>0.5.0</netty.http.version>
     <rs-api.version>2.0</rs-api.version>
     <quartz.version>2.2.0</quartz.version>
     <resteasy.version>3.0.8.Final</resteasy.version>
@@ -151,6 +151,7 @@
     <module>cdap-watchdog-tests</module>
     <module>cdap-app-fabric</module>
     <module>cdap-security</module>
+    <module>cdap-security-service</module>
     <module>cdap-gateway</module>
     <module>cdap-explore-client</module>
     <module>cdap-explore-jdbc</module>
