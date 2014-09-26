@@ -88,6 +88,7 @@ import co.cask.tephra.TransactionManager;
 import co.cask.tephra.TransactionSystemClient;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Throwables;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.io.ByteStreams;
 import com.google.inject.AbstractModule;
@@ -116,14 +117,21 @@ import java.net.InetSocketAddress;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.util.HashMap;
+import java.util.Set;
 
 /**
  * Base class to inherit from, provides testing functionality for {@link Application}.
  */
-public class TestBase {
+public abstract class TestBase {
+
+  protected enum Feature {
+    EXPLORE
+  }
 
   @ClassRule
   public static TemporaryFolder tmpFolder = new TemporaryFolder();
+
+  protected static Set<Feature> features = ImmutableSet.of();
 
   private static Injector injector;
   private static MetricsQueryService metricsQueryService;
@@ -139,6 +147,10 @@ public class TestBase {
   private static DatasetOpExecutor dsOpService;
   private static DatasetService datasetService;
   private static TransactionManager txService;
+
+  private static boolean isEnabled(Feature feature) {
+    return features.contains(feature);
+  }
 
   /**
    * Deploys an {@link Application}. The {@link co.cask.cdap.api.flow.Flow Flows} and
@@ -282,8 +294,10 @@ public class TestBase {
     schedulerService = injector.getInstance(SchedulerService.class);
     schedulerService.startAndWait();
     discoveryClient = injector.getInstance(DiscoveryServiceClient.class);
-    exploreExecutorService = injector.getInstance(ExploreExecutorService.class);
-    exploreExecutorService.startAndWait();
+    if (isEnabled(Feature.EXPLORE)) {
+      exploreExecutorService = injector.getInstance(ExploreExecutorService.class);
+      exploreExecutorService.startAndWait();
+    }
     exploreClient = injector.getInstance(ExploreClient.class);
     txSystemClient = injector.getInstance(TransactionSystemClient.class);
   }
@@ -340,6 +354,7 @@ public class TestBase {
     datasetService.stopAndWait();
     dsOpService.stopAndWait();
     txService.stopAndWait();
+    features = ImmutableSet.of();
   }
 
   private static void cleanDir(File dir) {
