@@ -14,29 +14,25 @@
  * the License.
  */
 
-package co.cask.cdap.app.runtime;
+package co.cask.cdap.client;
 
-import java.util.Map;
+import co.cask.cdap.client.common.ClientTestBase;
+import co.cask.cdap.client.exception.UnAuthorizedAccessTokenException;
+import co.cask.cdap.test.XSlowTests;
+import org.junit.Test;
+import org.junit.experimental.categories.Category;
+
+import java.io.IOException;
 
 /**
- *
+ * Test for {@link PingClient}.
  */
-public interface Arguments extends Iterable<Map.Entry<String, String>> {
+@Category(XSlowTests.class)
+public class PingClientTestRun extends ClientTestBase {
 
-  boolean hasOption(String optionName);
-
-  /**
-   * Returns option value for the given option name.
-   *
-   * @param name Name of the option.
-   * @return The value associated with the given name or {@code null} if no such option exists.
-   */
-  String getOption(String name);
-
-  String getOption(String name, String defaultOption);
-
-  /**
-   * Returns an immutable map that represents all arguments.
-   */
-  Map<String, String> asMap();
+  @Test
+  public void testAll() throws IOException, UnAuthorizedAccessTokenException {
+    PingClient pingClient = new PingClient(clientConfig);
+    pingClient.ping();
+  }
 }
