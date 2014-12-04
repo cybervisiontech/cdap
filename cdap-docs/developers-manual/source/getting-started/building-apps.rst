@@ -71,7 +71,7 @@ Once an application is deployed:
     * - On Windows:
       - ``> bin\cdap-cli.bat start <program> <app-id.program-id>``
 
-  .. list-table::
+    .. list-table::
       :widths: 20 80
       :header-rows: 1
 
