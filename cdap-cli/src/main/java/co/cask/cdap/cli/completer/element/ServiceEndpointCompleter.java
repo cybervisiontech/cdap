@@ -32,15 +32,16 @@ import javax.annotation.Nullable;
 import javax.inject.Inject;
 
 /**
- * Completer for http methods.
+ * Completer for service endpoints.
  */
-public class HttpMethodCompleter extends StringsCompleter {
+public class ServiceEndpointCompleter extends StringsCompleter {
+
+  private ServiceClient serviceClient;
   private String app;
   private String service;
-  private ServiceClient serviceClient;
 
   @Inject
-  public HttpMethodCompleter(final ServiceClient serviceClient) {
+  public ServiceEndpointCompleter(final ServiceClient serviceClient) {
     super(Lists.<String>newArrayList());
     this.serviceClient = serviceClient;
   }
@@ -49,11 +50,11 @@ public class HttpMethodCompleter extends StringsCompleter {
   public TreeSet<String> getStrings() {
     try {
       List<ServiceHttpEndpoint> endpoints = serviceClient.getEndpoints(app, service);
-      TreeSet<String> methods = Sets.newTreeSet();
+      TreeSet<String> paths = Sets.newTreeSet();
       for (ServiceHttpEndpoint endpoint : endpoints) {
-        methods.add(endpoint.getMethod());
+        paths.add(endpoint.getPath());
       }
-      return methods;
+      return paths;
     } catch (IOException e) {
       return Sets.newTreeSet();
     } catch (UnAuthorizedAccessTokenException e) {
@@ -67,7 +68,7 @@ public class HttpMethodCompleter extends StringsCompleter {
   public int complete(@Nullable String buffer, int cursor, List<CharSequence> candidates) {
     String buff = CLIMain.getCLI().getReader().getCursorBuffer().buffer.toString();
     String[] input = buff.trim().split(" ");
-    String[] appInfo = input[input.length - 1].split("\\.");
+    String[] appInfo = input[input.length - 2].split("\\.");
     if (appInfo.length > 1) {
       this.app = appInfo[0];
       this.service = appInfo[1];

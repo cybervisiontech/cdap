@@ -22,6 +22,7 @@ import co.cask.cdap.cli.completer.element.DatasetNameCompleter;
 import co.cask.cdap.cli.completer.element.DatasetTypeNameCompleter;
 import co.cask.cdap.cli.completer.element.HttpMethodCompleter;
 import co.cask.cdap.cli.completer.element.ProgramIdCompleter;
+import co.cask.cdap.cli.completer.element.ServiceEndpointCompleter;
 import co.cask.cdap.cli.completer.element.StreamIdCompleter;
 import co.cask.cdap.client.ApplicationClient;
 import com.google.common.base.Supplier;
@@ -43,16 +44,17 @@ public class DefaultCompleters implements Supplier<Map<String, Completer>> {
   @Inject
   public DefaultCompleters(Injector injector) {
     this.completers = ImmutableMap.<String, Completer>builder()
-        .put(ArgumentName.APP.getName(), injector.getInstance(AppIdCompleter.class))
-        .put(ArgumentName.DATASET_MODULE.getName(), injector.getInstance(DatasetModuleNameCompleter.class))
-        .put(ArgumentName.DATASET.getName(), injector.getInstance(DatasetNameCompleter.class))
-        .put(ArgumentName.DATASET_TYPE.getName(), injector.getInstance(DatasetTypeNameCompleter.class))
-        .put(ArgumentName.STREAM.getName(), injector.getInstance(StreamIdCompleter.class))
-        .put(ArgumentName.APP_JAR_FILE.getName(), new FileNameCompleter())
-        .put(ArgumentName.DATASET_MODULE_JAR_FILE.getName(), new FileNameCompleter())
-        .put(ArgumentName.HTTP_METHOD.getName(), new HttpMethodCompleter())
-        .putAll(generateProgramIdCompleters(injector))
-        .build();
+      .put(ArgumentName.APP.getName(), injector.getInstance(AppIdCompleter.class))
+      .put(ArgumentName.DATASET_MODULE.getName(), injector.getInstance(DatasetModuleNameCompleter.class))
+      .put(ArgumentName.DATASET.getName(), injector.getInstance(DatasetNameCompleter.class))
+      .put(ArgumentName.DATASET_TYPE.getName(), injector.getInstance(DatasetTypeNameCompleter.class))
+      .put(ArgumentName.STREAM.getName(), injector.getInstance(StreamIdCompleter.class))
+      .put(ArgumentName.APP_JAR_FILE.getName(), new FileNameCompleter())
+      .put(ArgumentName.DATASET_MODULE_JAR_FILE.getName(), new FileNameCompleter())
+      .put(ArgumentName.HTTP_METHOD.getName(), injector.getInstance(HttpMethodCompleter.class))
+      .put(ArgumentName.ENDPOINT.getName(), injector.getInstance(ServiceEndpointCompleter.class))
+      .putAll(generateProgramIdCompleters(injector))
+      .build();
   }
 
   private static Map<? extends String, ? extends Completer> generateProgramIdCompleters(Injector injector) {

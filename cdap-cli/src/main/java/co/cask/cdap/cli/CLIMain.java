@@ -48,7 +48,7 @@ public class CLIMain {
 
   private final CLIConfig cliConfig;
   private final HelpCommand helpCommand;
-  private final CLI cli;
+  private static CLI cli;
 
   private final Iterable<Command> commands;
   private final Map<String, Completer> completers;
@@ -79,9 +79,9 @@ public class CLIMain {
     this.commands = Iterables.concat(new DefaultCommands(injector).get(),
                                      ImmutableList.<Command>of(helpCommand));
     this.completers = new DefaultCompleters(injector).get();
-    this.cli = new CLI<Command>(commands, completers);
-    this.cli.getReader().setPrompt("cdap (" + cliConfig.getURI() + ")> ");
-    this.cli.setExceptionHandler(new CLIExceptionHandler<Exception>() {
+    cli = new CLI<Command>(commands, completers);
+    cli.getReader().setPrompt("cdap (" + cliConfig.getURI() + ")> ");
+    cli.setExceptionHandler(new CLIExceptionHandler<Exception>() {
       @Override
       public void handleException(PrintStream output, Exception e) {
         if (e instanceof SSLHandshakeException) {
@@ -104,8 +104,8 @@ public class CLIMain {
     });
   }
 
-  public CLI getCLI() {
-    return this.cli;
+  public static CLI getCLI() {
+    return cli;
   }
 
   private Iterable<Command> getCommands() {
