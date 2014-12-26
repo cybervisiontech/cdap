@@ -52,6 +52,7 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.Callable;
 import java.util.jar.JarEntry;
 import java.util.jar.JarInputStream;
 
@@ -80,63 +81,69 @@ public class WebappProgramRunner implements ProgramRunner {
   }
 
   @Override
-  public ProgramController run(Program program, ProgramOptions options) {
+  public ProgramController run(final Program program, ProgramOptions options) {
     try {
 
-      ProgramType processorType = program.getType();
-      Preconditions.checkNotNull(processorType, "Missing processor type");
-      Preconditions.checkArgument(processorType == ProgramType.WEBAPP, "Only WEBAPP process type is supported");
-
-      LOG.info("Initializing Webapp for app {} with jar {}", program.getApplicationId(),
-               program.getJarLocation().getName());
-
-      String serviceName = getServiceName(ProgramType.WEBAPP, program);
-      Preconditions.checkNotNull(serviceName, "Cannot determine service name for program %s", program.getName());
-      LOG.info("Got service name {}", serviceName);
-
-      // Start netty server
-      // TODO: add metrics reporting
-      JarHttpHandler jarHttpHandler = webappHttpHandlerFactory.createHandler(program.getJarLocation());
-      NettyHttpService.Builder builder = new CommonNettyHttpServiceBuilder(cConf);
-      builder.addHttpHandlers(ImmutableSet.of(jarHttpHandler));
-      builder.setUrlRewriter(new WebappURLRewriter(jarHttpHandler));
-      builder.setHost(hostname.getCanonicalHostName());
-      NettyHttpService httpService = builder.build();
-      httpService.startAndWait();
-      final InetSocketAddress address = httpService.getBindAddress();
-
-      RunId runId = RunIds.generate();
-
-      // Register service, and the serving host names.
+      final RunId runId = RunIds.generate();
       final List<Cancellable> cancellables = Lists.newArrayList();
-      LOG.info("Webapp {} running on address {} registering as {}", program.getApplicationId(), address, serviceName);
-      cancellables.add(serviceAnnouncer.announce(serviceName, address.getPort()));
+      Callable<NettyHttpService> call = new Callable<NettyHttpService>() {
+        @Override
+        public NettyHttpService call() throws Exception {
+          ProgramType processorType = program.getType();
+          Preconditions.checkNotNull(processorType, "Missing processor type");
+          Preconditions.checkArgument(processorType == ProgramType.WEBAPP, "Only WEBAPP process type is supported");
 
-      for (String hname : getServingHostNames(Locations.newInputSupplier(program.getJarLocation()))) {
-        final String sname = ProgramType.WEBAPP.name().toLowerCase() + "/" + hname;
+          LOG.info("Initializing Webapp for app {} with jar {}", program.getApplicationId(),
+                   program.getJarLocation().getName());
 
-        LOG.info("Webapp {} running on address {} registering as {}", program.getApplicationId(), address, sname);
-        cancellables.add(discoveryService.register(new Discoverable() {
-          @Override
-          public String getName() {
-            return sname;
+          String serviceName = getServiceName(ProgramType.WEBAPP, program);
+          Preconditions.checkNotNull(serviceName, "Cannot determine service name for program %s", program.getName());
+          LOG.info("Got service name {}", serviceName);
+
+          // Start netty server
+          // TODO: add metrics reporting
+          JarHttpHandler jarHttpHandler = webappHttpHandlerFactory.createHandler(program.getJarLocation());
+          NettyHttpService.Builder builder = new CommonNettyHttpServiceBuilder(cConf);
+          builder.addHttpHandlers(ImmutableSet.of(jarHttpHandler));
+          builder.setUrlRewriter(new WebappURLRewriter(jarHttpHandler));
+          builder.setHost(hostname.getCanonicalHostName());
+
+          NettyHttpService httpService = builder.build();
+          httpService.startAndWait();
+          final InetSocketAddress address = httpService.getBindAddress();
+          // Register service, and the serving host names.
+
+          LOG.info("Webapp {} running on address {} registering as {}", program.getApplicationId(), address, serviceName);
+          cancellables.add(serviceAnnouncer.announce(serviceName, address.getPort()));
+
+          for (String hname : getServingHostNames(Locations.newInputSupplier(program.getJarLocation()))) {
+            final String sname = ProgramType.WEBAPP.name().toLowerCase() + "/" + hname;
+
+            LOG.info("Webapp {} running on address {} registering as {}", program.getApplicationId(), address, sname);
+            cancellables.add(discoveryService.register(new Discoverable() {
+              @Override
+              public String getName() {
+                return sname;
+              }
+
+              @Override
+              public InetSocketAddress getSocketAddress() {
+                return address;
+              }
+            }));
           }
+          return httpService;
+        }
+      };
 
-          @Override
-          public InetSocketAddress getSocketAddress() {
-            return address;
-          }
-        }));
-      }
-
-      return new WebappProgramController(program.getName(), runId, httpService, new Cancellable() {
+      return new WebappProgramController(program.getName(), runId, new Cancellable() {
         @Override
         public void cancel() {
           for (Cancellable cancellable : cancellables) {
             cancellable.cancel();
           }
         }
-      });
+      }, call);
 
     } catch (Exception e) {
       throw Throwables.propagate(e);

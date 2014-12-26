@@ -46,6 +46,8 @@ import org.apache.twill.internal.RunIds;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.concurrent.Callable;
+
 /**
  * Runs {@link Spark} programs
  */
@@ -78,7 +80,7 @@ public class SparkProgramRunner implements ProgramRunner {
   }
 
   @Override
-  public ProgramController run(Program program, ProgramOptions options) {
+  public ProgramController run(final Program program, final ProgramOptions options) {
     // Extract and verify parameters
     final ApplicationSpecification appSpec = program.getSpecification();
     Preconditions.checkNotNull(appSpec, "Missing application specification.");
@@ -116,13 +118,17 @@ public class SparkProgramRunner implements ProgramRunner {
 
     LoggingContextAccessor.setLoggingContext(context.getLoggingContext());
 
-    Service sparkRuntimeService = new SparkRuntimeService(cConf, hConf, spark, spec, context,
+    final Service sparkRuntimeService = new SparkRuntimeService(cConf, hConf, spark, spec, context,
                                                           program.getJarLocation(), locationFactory,
                                                           txSystemClient);
-    ProgramController controller = new SparkProgramController(sparkRuntimeService, context);
+    Callable call = new Callable() {
+      @Override
+      public Object call() throws Exception {
+        LOG.info("Starting Spark Job: {}", context.toString());
+        return sparkRuntimeService.start();
+      }
+    };
 
-    LOG.info("Starting Spark Job: {}", context.toString());
-    sparkRuntimeService.start();
-    return controller;
+    return new SparkProgramController(sparkRuntimeService, context, call);
   }
 }

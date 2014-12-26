@@ -33,6 +33,7 @@ import org.apache.twill.api.ServiceAnnouncer;
 import org.apache.twill.internal.RunIds;
 
 import java.net.InetAddress;
+import java.util.concurrent.Callable;
 
 /**
  *
@@ -69,13 +70,19 @@ public class WorkflowProgramRunner implements ProgramRunner {
     Preconditions.checkNotNull(workflowSpec, "Missing WorkflowSpecification for %s", program.getName());
 
     RunId runId = RunIds.generate();
-    WorkflowDriver driver = new WorkflowDriver(program, runId, options, hostname, workflowSpec, mapReduceProgramRunner);
+    final WorkflowDriver driver = new WorkflowDriver(program, runId, options, hostname, workflowSpec, mapReduceProgramRunner);
 
     // Controller needs to be created before starting the driver so that the state change of the driver
     // service can be fully captured by the controller.
-    ProgramController controller = new WorkflowProgramController(program, driver, serviceAnnouncer, runId);
-    driver.start();
 
-    return controller;
+    Callable call = new Callable() {
+      @Override
+      public Object call() throws Exception {
+        return driver.start();
+      }
+    };
+
+    return new WorkflowProgramController(program, driver, serviceAnnouncer, runId,
+                                         call);
   }
 }

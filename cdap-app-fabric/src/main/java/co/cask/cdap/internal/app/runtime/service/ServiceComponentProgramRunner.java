@@ -45,6 +45,8 @@ import org.apache.twill.api.ServiceAnnouncer;
 import org.apache.twill.discovery.DiscoveryServiceClient;
 import org.apache.twill.internal.RunIds;
 
+import java.util.concurrent.Callable;
+
 /**
  * A {@link ProgramRunner} that runs a component inside a Service (either a HTTP Server or a Worker).
  */
@@ -98,7 +100,7 @@ public class ServiceComponentProgramRunner implements ProgramRunner {
     ServiceSpecification spec = appSpec.getServices().get(program.getName());
 
     // By convention, the Http service always has the same name as the service itself.
-    Service component;
+    final Service component;
     if (componentName.equals(program.getName())) {
       // HTTP service
       String host = options.getArguments().getOption(ProgramOptionConstants.HOST);
@@ -119,9 +121,14 @@ public class ServiceComponentProgramRunner implements ProgramRunner {
       component = new ServiceWorkerDriver(program, workerSpec, context);
     }
 
-    ProgramControllerServiceAdapter controller = new ProgramControllerServiceAdapter(component, componentName, runId);
-    component.start();
-    return controller;
+    Callable call = new Callable() {
+      @Override
+      public Object call() throws Exception {
+        return component.start();
+      }
+    };
+
+    return new ProgramControllerServiceAdapter(component, componentName, runId, call);
   }
 
   private BasicHttpServiceContextFactory createHttpServiceContextFactory(final Program program,

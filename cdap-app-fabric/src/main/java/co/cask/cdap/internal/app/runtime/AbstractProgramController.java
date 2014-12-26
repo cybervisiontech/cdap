@@ -137,6 +137,21 @@ public abstract class AbstractProgramController implements ProgramController {
   }
 
   @Override
+  public final ListenableFuture<ProgramController> start() {
+    SettableFuture<ProgramController> result = SettableFuture.create();
+    try {
+      state.set(State.STARTING);
+      doStart();
+      result.set(AbstractProgramController.this);
+    } catch (Exception e) {
+      error(e);
+    }
+    return result;
+  }
+
+  protected abstract void doStart() throws Exception;
+
+  @Override
   public final Cancellable addListener(Listener listener, Executor executor) {
     Preconditions.checkNotNull(listener, "Listener shouldn't be null.");
     Preconditions.checkNotNull(executor, "Executor shouldn't be null.");

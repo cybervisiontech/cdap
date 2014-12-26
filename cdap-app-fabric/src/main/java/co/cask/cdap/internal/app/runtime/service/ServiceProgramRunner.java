@@ -51,6 +51,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Callable;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -71,7 +72,9 @@ public class ServiceProgramRunner implements ProgramRunner {
   }
 
   @Override
-  public ProgramController run(Program program, ProgramOptions options) {
+  public ProgramController run(final Program program, final ProgramOptions options) {
+    //RunId for the service
+    final RunId runId = RunIds.generate();
     // Extract and verify parameters
     ApplicationSpecification appSpec = program.getSpecification();
     Preconditions.checkNotNull(appSpec, "Missing application specification.");
@@ -80,14 +83,17 @@ public class ServiceProgramRunner implements ProgramRunner {
     Preconditions.checkNotNull(processorType, "Missing processor type.");
     Preconditions.checkArgument(processorType == ProgramType.SERVICE, "Only SERVICE process type is supported.");
 
-    ServiceSpecification serviceSpec = appSpec.getServices().get(program.getName());
+    final ServiceSpecification serviceSpec = appSpec.getServices().get(program.getName());
     Preconditions.checkNotNull(serviceSpec, "Missing ServiceSpecification for %s", program.getName());
 
-    //RunId for the service
-    RunId runId = RunIds.generate();
-    Table<String, Integer, ProgramController> components = startAllComponents(program, runId,
-                                                                              options.getUserArguments(), serviceSpec);
-    return new ServiceProgramController(components, runId, program, serviceSpec, options.getUserArguments());
+    Callable<Table<String, Integer, ProgramController>> call = new Callable<Table<String, Integer, ProgramController>>() {
+      @Override
+      public Table<String, Integer, ProgramController> call() throws Exception {
+        return startAllComponents(program, runId, options.getUserArguments(), serviceSpec);
+      }
+    };
+
+    return new ServiceProgramController(runId, program, serviceSpec, options.getUserArguments(), call);
   }
 
   /**
@@ -161,20 +167,20 @@ public class ServiceProgramRunner implements ProgramRunner {
   }
 
   private final class ServiceProgramController extends AbstractProgramController {
-    private final Table<String, Integer, ProgramController> components;
+    private Table<String, Integer, ProgramController> components;
     private final Program program;
     private final ServiceSpecification serviceSpec;
     private final Arguments userArguments;
     private final Lock lock = new ReentrantLock();
+    private final Callable<Table<String, Integer, ProgramController>> runFunction;
 
-    ServiceProgramController(Table<String, Integer, ProgramController> components,
-                             RunId runId, Program program, ServiceSpecification serviceSpec,
-                             Arguments userArguments) {
+    ServiceProgramController(RunId runId, Program program, ServiceSpecification serviceSpec,
+                             Arguments userArguments, Callable<Table<String, Integer, ProgramController>> runFunction) {
       super(program.getName(), runId);
       this.program = program;
-      this.components = components;
       this.serviceSpec = serviceSpec;
       this.userArguments = userArguments;
+      this.runFunction = runFunction;
       started();
     }
 
@@ -255,6 +261,11 @@ public class ServiceProgramRunner implements ProgramRunner {
                                                            .run(program, options);
         components.put(runnableName, instanceId, controller);
       }
+    }
+
+    @Override
+    public void doStart() throws Exception {
+        components = runFunction.call();
     }
   }
 }

@@ -117,6 +117,8 @@ public interface ProgramController {
 
   ListenableFuture<ProgramController> stop();
 
+  ListenableFuture<ProgramController> start();
+
   /**
    * @return The current state of the program at the time when this method is called.
    */

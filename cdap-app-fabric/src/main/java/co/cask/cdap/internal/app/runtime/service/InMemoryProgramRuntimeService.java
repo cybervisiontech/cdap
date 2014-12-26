@@ -67,7 +67,7 @@ public final class InMemoryProgramRuntimeService extends AbstractProgramRuntimeS
   }
 
   @Override
-  public synchronized RuntimeInfo run(Program program, ProgramOptions options) {
+  public synchronized RuntimeInfo prepare(Program program, ProgramOptions options) {
     try {
       File tmpDir = new File(cConf.get(Constants.CFG_LOCAL_DATA_DIR), cConf.get(Constants.AppFabric.TEMP_DIR));
       final File destinationUnpackedJarDir = new File(tmpDir, String.format("%s.%s",
@@ -76,7 +76,7 @@ public final class InMemoryProgramRuntimeService extends AbstractProgramRuntimeS
       destinationUnpackedJarDir.mkdirs();
 
       Program bundleJarProgram = Programs.createWithUnpack(program.getJarLocation(), destinationUnpackedJarDir);
-      RuntimeInfo info = super.run(bundleJarProgram, options);
+      RuntimeInfo info = super.prepare(bundleJarProgram, options);
       info.getController().addListener(new AbstractListener() {
         @Override
         public void stopped() {

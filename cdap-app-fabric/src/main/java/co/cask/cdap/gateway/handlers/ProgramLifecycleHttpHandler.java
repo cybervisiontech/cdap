@@ -1270,7 +1270,7 @@ public class ProgramLifecycleHttpHandler extends AbstractAppFabricHttpHandler {
 
       BasicArguments userArguments = new BasicArguments(userArgs);
       ProgramRuntimeService.RuntimeInfo runtimeInfo =
-        runtimeService.run(program, new SimpleProgramOptions(id.getId(), new BasicArguments(), userArguments, debug));
+        runtimeService.prepare(program, new SimpleProgramOptions(id.getId(), new BasicArguments(), userArguments, debug));
 
       final ProgramController controller = runtimeInfo.getController();
       final String runId = controller.getRunId().getId();
@@ -1302,6 +1302,9 @@ public class ProgramLifecycleHttpHandler extends AbstractAppFabricHttpHandler {
                         ProgramController.State.ERROR);
         }
       }, Threads.SAME_THREAD_EXECUTOR);
+
+      //starting program here
+      controller.start();
 
       return AppFabricServiceStatus.OK;
     } catch (DatasetInstantiationException e) {

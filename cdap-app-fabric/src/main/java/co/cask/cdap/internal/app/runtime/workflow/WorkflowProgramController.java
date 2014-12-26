@@ -27,6 +27,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.net.InetSocketAddress;
+import java.util.concurrent.Callable;
 
 /**
  *
@@ -39,12 +40,15 @@ final class WorkflowProgramController extends AbstractProgramController {
   private final String serviceName;
   private final ServiceAnnouncer serviceAnnouncer;
   private Cancellable cancelAnnounce;
+  private final Callable runFunction;
 
-  WorkflowProgramController(Program program, WorkflowDriver driver, ServiceAnnouncer serviceAnnouncer, RunId runId) {
+  WorkflowProgramController(Program program, WorkflowDriver driver, ServiceAnnouncer serviceAnnouncer, RunId runId,
+                            Callable runFunction) {
     super(program.getName(), runId);
     this.driver = driver;
     this.serviceName = getServiceName(program);
     this.serviceAnnouncer = serviceAnnouncer;
+    this.runFunction = runFunction;
     startListen(driver);
   }
 
@@ -67,7 +71,7 @@ final class WorkflowProgramController extends AbstractProgramController {
   protected void doCommand(String name, Object value) throws Exception {
     LOG.info("Command ignored {}, {}", name, value);
   }
-  
+
   private void startListen(Service service) {
     // Forward state changes from the given service to this controller.
     service.addListener(new ServiceListenerAdapter() {
@@ -100,5 +104,10 @@ final class WorkflowProgramController extends AbstractProgramController {
   private String getServiceName(Program program) {
     return String.format("workflow.%s.%s.%s",
                          program.getAccountId(), program.getApplicationId(), program.getName());
+  }
+
+  @Override
+  public void doStart() throws Exception {
+    runFunction.call();
   }
 }

@@ -24,6 +24,8 @@ import org.apache.twill.common.Threads;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.concurrent.Callable;
+
 /**
  * A {@link ProgramController} implementation that control a guava Service.
  */
@@ -32,11 +34,18 @@ public class ProgramControllerServiceAdapter extends AbstractProgramController {
   private static final Logger LOG = LoggerFactory.getLogger(ProgramControllerServiceAdapter.class);
 
   private final Service service;
+  private final Callable runFunction;
 
-  public ProgramControllerServiceAdapter(Service service, String programName, RunId runId) {
+  public ProgramControllerServiceAdapter(Service service, String programName, RunId runId, Callable runFunction) {
     super(programName, runId);
     this.service = service;
+    this.runFunction = runFunction;
     listenToRuntimeState(service);
+  }
+
+  @Override
+  protected void doStart() throws Exception {
+    runFunction.call();
   }
 
   @Override

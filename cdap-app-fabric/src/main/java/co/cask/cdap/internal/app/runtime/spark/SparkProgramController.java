@@ -22,6 +22,8 @@ import co.cask.cdap.app.runtime.ProgramController;
 import co.cask.cdap.internal.app.runtime.ProgramControllerServiceAdapter;
 import com.google.common.util.concurrent.Service;
 
+import java.util.concurrent.Callable;
+
 /**
  * A {@link ProgramController} for {@link Spark} jobs. This class acts as an adapter for reflecting state changes
  * happening in {@link SparkRuntimeService}
@@ -29,10 +31,12 @@ import com.google.common.util.concurrent.Service;
 public final class SparkProgramController extends ProgramControllerServiceAdapter {
 
   private final SparkContext context;
+  private final Callable runFunction;
 
-  SparkProgramController(Service sparkRuntimeService, BasicSparkContext context) {
-    super(sparkRuntimeService, context.getProgramName(), context.getRunId());
+  SparkProgramController(Service sparkRuntimeService, BasicSparkContext context, Callable runFunction) {
+    super(sparkRuntimeService, context.getProgramName(), context.getRunId(), runFunction);
     this.context = context;
+    this.runFunction = runFunction;
   }
 
   @Override
@@ -46,5 +50,10 @@ public final class SparkProgramController extends ProgramControllerServiceAdapte
    */
   public SparkContext getContext() {
     return context;
+  }
+
+  @Override
+  protected void doStart() throws Exception {
+    runFunction.call();
   }
 }

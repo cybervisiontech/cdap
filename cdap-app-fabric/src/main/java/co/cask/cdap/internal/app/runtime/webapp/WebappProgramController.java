@@ -23,21 +23,29 @@ import org.apache.twill.common.Cancellable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.concurrent.Callable;
+
 /**
  * Controller for webapp.
  */
 public class WebappProgramController extends AbstractProgramController {
   private static final Logger LOG = LoggerFactory.getLogger(WebappProgramController.class);
 
-  private final NettyHttpService httpService;
+  private NettyHttpService httpService;
   private final Cancellable cancellable;
+  private final Callable<NettyHttpService> runFunction;
 
-  public WebappProgramController(String programName, RunId runId, NettyHttpService httpService,
-                                 Cancellable cancellable) {
+  public WebappProgramController(String programName, RunId runId,
+                                 Cancellable cancellable, Callable<NettyHttpService> runFunction) {
     super(programName, runId);
-    this.httpService = httpService;
     this.cancellable = cancellable;
+    this.runFunction = runFunction;
     started();
+  }
+
+  @Override
+  protected void doStart() throws Exception {
+    httpService = runFunction.call();
   }
 
   @Override

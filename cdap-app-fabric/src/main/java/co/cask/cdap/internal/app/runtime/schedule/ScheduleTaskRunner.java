@@ -102,9 +102,7 @@ public final class ScheduleTaskRunner {
    * Executes a program and block until it is completed.
    */
   private void executeAndBlock(final Program program, ProgramOptions options) throws JobExecutionException {
-    ProgramController controller = runtimeService.run(program, options).getController();
-    store.setStart(program.getId(), controller.getRunId().getId(),
-                   TimeUnit.SECONDS.convert(System.currentTimeMillis(), TimeUnit.MILLISECONDS));
+    ProgramController controller = runtimeService.prepare(program, options).getController();
 
     final Id.Program programId = program.getId();
     final String runId = controller.getRunId().getId();
@@ -132,6 +130,12 @@ public final class ScheduleTaskRunner {
         latch.countDown();
       }
     }, Threads.SAME_THREAD_EXECUTOR);
+
+    //start here
+    controller.start();
+
+    store.setStart(program.getId(), controller.getRunId().getId(),
+                   TimeUnit.SECONDS.convert(System.currentTimeMillis(), TimeUnit.MILLISECONDS));
 
     try {
       latch.await();

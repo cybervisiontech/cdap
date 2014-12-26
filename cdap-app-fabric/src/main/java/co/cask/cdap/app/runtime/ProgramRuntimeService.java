@@ -42,13 +42,14 @@ public interface ProgramRuntimeService extends Service {
   }
 
   /**
-   * Starts the given program and return a {@link RuntimeInfo} about the running program.
+   * Prepare the given program and return a {@link RuntimeInfo} about the program.
+   * After this it can be started from {@link ProgramController}.
    *
-   * @param program A {@link Program} to run.
+   * @param program A {@link Program} to prepare to run.
    * @param options {@link ProgramOptions} that are needed by the program.
-   * @return A {@link ProgramController} for the running program.
+   * @return A {@link ProgramController} for the program.
    */
-  RuntimeInfo run(Program program, ProgramOptions options);
+  RuntimeInfo prepare(Program program, ProgramOptions options);
 
   /**
    * Find the {@link RuntimeInfo} for a running program with the given {@link RunId}.
